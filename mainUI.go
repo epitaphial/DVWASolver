@@ -19,40 +19,49 @@ type DVWAfker struct {
 	confirmRes	string
 }
 
-type subWindow struct{
-		//subWindow
+//for brute and injection
+type BruteSubWindow struct{
+		//BruteSubWindow
 		editFile	 *walk.LineEdit
 		fileButton		*walk.PushButton
 		attackButton		*walk.PushButton
 		filePath 		string
 		outPut	 *walk.TextEdit
 		*walk.MainWindow
+		pushAble bool
+		progressBar		*walk.ProgressBar
 }
 
-func (sw *subWindow) pbClicked()error {
+func (brt_sw *BruteSubWindow) pbClicked()error {
 
     dlg := new(walk.FileDialog)
-    dlg.FilePath = sw.filePath
+    dlg.FilePath = brt_sw.filePath
     dlg.Title = "Select File"
 	dlg.Filter = "Txt files (*.txt)|*.txt|All files (*.*)|*.*"
-	sw.editFile.SetText("")
-	if ok,err:= dlg.ShowOpen(sw); err!=nil {
+	brt_sw.editFile.SetText("")
+	if ok,err:= dlg.ShowOpen(brt_sw); err!=nil {
         return err
     } else if!ok {
         return nil
     }
-	sw.editFile.SetText(dlg.FilePath)
-	sw.filePath = dlg.FilePath
+	brt_sw.editFile.SetText(dlg.FilePath)
+	brt_sw.filePath = dlg.FilePath
 	return nil
 }
 
 
 func createDVWA() (*DVWAfker, error) {
+	//main window
 	df := &DVWAfker{}
-	sw := &subWindow{}
-	subdef := MainWindow{
-		AssignTo: &sw.MainWindow,
-		Title:    "dvwa crack",
+	//for brute and injection
+	brt_sw := &BruteSubWindow{}
+	inj_sw := &BruteSubWindow{}
+
+
+	//brute force bind
+	brute_subdef := MainWindow{
+		AssignTo: &brt_sw.MainWindow,
+		Title:    "BruteForce",
 		MinSize:  Size{Width: 200, Height: 250},
 		Size:     Size{Width: 400, Height: 500},
 		Layout:	VBox{},
@@ -64,32 +73,46 @@ func createDVWA() (*DVWAfker, error) {
 							Children:	[]Widget{
 								LineEdit{
 									MinSize:	Size{Width: 120,Height: 10},
-									AssignTo:	&sw.editFile,
+									AssignTo:	&brt_sw.editFile,
 									ReadOnly: true,
 								},
 								PushButton{
 									Text:    "Open file",
 									MinSize: Size{Width: 120,Height: 50},
 									OnClicked: func(){
-										if err:= sw.pbClicked(); err!=nil {
+										if err:= brt_sw.pbClicked(); err!=nil {
 											log.Print(err)
 										}									
 									},
-									AssignTo: &sw.fileButton,
+									AssignTo: &brt_sw.fileButton,
 								},
 								PushButton{
 									Text:    "Start Attack",
 									MinSize: Size{Width: 120,Height: 50},
 									OnClicked: func(){
-										go ExcBrute(df.cookieDVWA,df.urlDVWA,sw)
+										if brt_sw.filePath == "" {
+											var tmp walk.Form
+											walk.MsgBox(tmp, "Warning", "Load File First!", walk.MsgBoxIconInformation)
+										}else{
+											if brt_sw.pushAble == true{
+												go ExcBrute(df.cookieDVWA,df.urlDVWA,brt_sw)
+											}else{
+												var tmp walk.Form
+												walk.MsgBox(tmp, "Warning", "Wait For The Current Progress!", walk.MsgBoxIconInformation)
+											}
+											}
+											
 										return
 									},
-									AssignTo: &sw.attackButton,
+									AssignTo: &brt_sw.attackButton,
 								},
 								TextEdit{
 									MinSize:	Size{Width: 120,Height: 10},
-									AssignTo:	&sw.outPut,
+									AssignTo:	&brt_sw.outPut,
 									ReadOnly: true,
+								},
+								ProgressBar{
+									AssignTo:	&brt_sw.progressBar,
 								},
 							},
 						},
@@ -98,6 +121,47 @@ func createDVWA() (*DVWAfker, error) {
 			},
 		}
 
+		//Command Injection bind
+		inj_subdef := MainWindow{
+			AssignTo: &inj_sw.MainWindow,
+			Title:    "Command Injection",
+			MinSize:  Size{Width: 200, Height: 250},
+			Size:     Size{Width: 400, Height: 500},
+			Layout:	VBox{},
+			Children:	[]Widget{
+					Composite{
+						Layout :Grid{Columns:2,Spacing:10},
+						Children: []Widget{
+							VSplitter{
+								Children:	[]Widget{
+									PushButton{
+										Text:    "Start Attack",
+										MinSize: Size{Width: 120,Height: 50},
+										OnClicked: func(){
+											if inj_sw.pushAble == true{
+												go ExcComInj(df.cookieDVWA,df.urlDVWA,inj_sw)
+											}else{
+												var tmp walk.Form
+												walk.MsgBox(tmp, "Warning", "Wait For The Current Progress!", walk.MsgBoxIconInformation)
+											}
+											return
+										},
+										AssignTo: &inj_sw.attackButton,
+									},
+									TextEdit{
+										MinSize:	Size{Width: 120,Height: 10},
+										AssignTo:	&inj_sw.outPut,
+										ReadOnly: true,
+									},
+									ProgressBar{
+										AssignTo:	&inj_sw.progressBar,
+									},
+								},
+							},
+						},
+					},
+				},
+			}
 	def := MainWindow{
 		AssignTo: &df.window,
 		Title:    "dvwa crack",
@@ -134,7 +198,12 @@ func createDVWA() (*DVWAfker, error) {
 										walk.MsgBox(tmp, "Warning", "Can not be empty!", walk.MsgBoxIconInformation)
 										return
 									}else{
-										cookie := InitDvwaUrl(df.dvwaEdit.Text())
+										urlToParse := df.dvwaEdit.Text()
+										if urlToParse[len(urlToParse)-1:] != "/"{
+											urlToParse = urlToParse + "/"
+										}
+										
+										cookie := InitDvwaUrl(urlToParse)
 										if cookie == ""{
 											var tmp walk.Form
 											walk.MsgBox(tmp, "Error", "Can not get cookie!", walk.MsgBoxIconInformation)
@@ -143,7 +212,7 @@ func createDVWA() (*DVWAfker, error) {
 											var tmp walk.Form
 											walk.MsgBox(tmp, "Info", "Success init!", walk.MsgBoxIconInformation)
 											df.cookieDVWA = cookie
-											df.urlDVWA = df.dvwaEdit.Text()
+											df.urlDVWA = urlToParse
 											df.urlLabel.SetText("PHPSSID:")
 											df.dvwaEdit.SetText(cookie)
 											df.dvwaEdit.SetReadOnly(true)
@@ -169,11 +238,30 @@ func createDVWA() (*DVWAfker, error) {
 												walk.MsgBox(tmp, "Error", "Get cookie first!", walk.MsgBoxIconInformation)
 												return
 											}
-											subdef.Create()
-											//_ = sw.MainWindow.Run()
+											brt_sw.pushAble = true
+											brute_subdef.Create()
+											//_ = brt_sw.MainWindow.Run()
 											return
 										},
 									},
+									PushButton{
+										Text:    "Command Injection",
+										MinSize: Size{Width: 120,Height: 50},
+										OnClicked: func() {
+											if df.confirmRes != "ok"{
+												var tmp walk.Form
+												walk.MsgBox(tmp, "Error", "Get cookie first!", walk.MsgBoxIconInformation)
+												return
+											}
+											inj_sw.pushAble = true
+											inj_subdef.Create()
+											//_ = brt_sw.MainWindow.Run()
+											return
+										},
+									},
+
+
+
 								},
 							},
 						},

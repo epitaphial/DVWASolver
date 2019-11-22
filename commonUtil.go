@@ -9,6 +9,10 @@ import (
 	"strings"
 )
 
+func DVWADebugger(debugInfo string){
+	fmt.Println(debugInfo)
+}
+
 // 获取页面response报文，以及cookie
 func GetContents(requrl string) (string ,string,error) {
     resp,err := http.Get(requrl)

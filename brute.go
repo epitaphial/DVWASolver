@@ -1,3 +1,4 @@
+//Brute Force
 package main
 
 import (
@@ -51,28 +52,42 @@ func BfWithCookie(cookstr string,fuckurl string,username string,password string)
 
 
 //读取字典文件，进行爆破
-func ExcBrute(cookie string,urlDVWA string,sw *subWindow)  {
+func ExcBrute(cookie string,urlDVWA string,sw *BruteSubWindow) bool {
+	sw.pushAble = false
 	dictPath := sw.filePath
 	urlDVWABrute := urlDVWA + "vulnerabilities/brute/"
    	file, err := os.OpenFile(dictPath, os.O_RDWR, 0666)
    	if err != nil {
 		sw.outPut.SetText("Open file error!")
-      	return
+      	return false
    	}
 	defer file.Close()
 	   
 	buf := bufio.NewReader(file)
-	
+	count1 :=0
+	for {
+		_,err := buf.ReadString('\n')
+		if err!= nil{
+			break
+		}
+		count1++
+
+	}
+	file.Seek(0, os.SEEK_SET)
+	sw.progressBar.SetRange(0,count1)
+	sw.progressBar.SetValue(0)
 	count := 1
    	for {
       	line, err := buf.ReadString('\n')
 		line = strings.TrimSpace(line)
 		kv := strings.Split(line, " ")
 		temp := fmt.Sprintf("test%d:\nusername:%s\npassword:%s\r\n",count,kv[0],kv[1])
+		sw.progressBar.SetValue(count-1)
 		sw.outPut.AppendText(temp)
 		count++
 		if BfWithCookie(cookie,urlDVWABrute,kv[0],kv[1]) == true{
 			sw.outPut.AppendText("\nsuccess!\r\n")
+			sw.progressBar.SetValue(count1)
 			break
 		}
 		if count%5 == 0{
@@ -81,11 +96,13 @@ func ExcBrute(cookie string,urlDVWA string,sw *subWindow)  {
       	if err != nil {
          	if err == io.EOF {
             	fmt.Println("no pattern!")
-            	break
+            	return false
          	} else {
             	fmt.Println("error!", err)
-            	return
+            	return false
          	}
       	}
-   	}
+	   }
+	   sw.pushAble = true
+	   return true
 }
