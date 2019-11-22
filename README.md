@@ -10,6 +10,7 @@ A Solver with GUI for DVWA,written in golang.
 ## HOW TO USE
 
 with command:   `go build`
+
 without command:    `go build -ldflags="-H windowsgui"`
 
 then run the exe file
