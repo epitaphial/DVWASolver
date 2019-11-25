@@ -20,5 +20,6 @@ then run the exe file
 - [x] Brute Force.
 - [x] GUI.
 - [x] Command Injection.
+- [x] File Upload
 - [ ] Sql Injection.
 - [ ] etc
