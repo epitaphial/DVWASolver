@@ -34,7 +34,7 @@ func InjWithCookie(cookstr string,fuckurl string,payload string) bool{
 	return false
 }
 
-//读取字典文件，进行爆破
+//进行爆破
 func ExcComInj(cookie string,urlDVWA string,sw *BruteSubWindow) bool {
 	sw.pushAble = false
 

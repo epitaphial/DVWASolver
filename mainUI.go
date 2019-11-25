@@ -23,6 +23,8 @@ type DVWAfker struct {
 type BruteSubWindow struct{
 		//BruteSubWindow
 		editFile	 *walk.LineEdit
+		editCom		*walk.LineEdit
+		comExc		*walk.PushButton
 		fileButton		*walk.PushButton
 		attackButton		*walk.PushButton
 		filePath 		string
@@ -32,12 +34,18 @@ type BruteSubWindow struct{
 		progressBar		*walk.ProgressBar
 }
 
-func (brt_sw *BruteSubWindow) pbClicked()error {
+func (brt_sw *BruteSubWindow) pbClicked(pbTp int)error {
 
     dlg := new(walk.FileDialog)
     dlg.FilePath = brt_sw.filePath
-    dlg.Title = "Select File"
-	dlg.Filter = "Txt files (*.txt)|*.txt|All files (*.*)|*.*"
+	dlg.Title = "Select File"
+	if pbTp == 0{
+		dlg.Filter = "Txt files (*.txt)|*.txt|All files (*.*)|*.*"
+	}else if pbTp == 1{
+		dlg.Filter = "All files (*.*)|*.*"
+	}
+
+	
 	brt_sw.editFile.SetText("")
 	if ok,err:= dlg.ShowOpen(brt_sw); err!=nil {
         return err
@@ -56,6 +64,7 @@ func createDVWA() (*DVWAfker, error) {
 	//for brute and injection
 	brt_sw := &BruteSubWindow{}
 	inj_sw := &BruteSubWindow{}
+	file_sw := &BruteSubWindow{}
 
 
 	//brute force bind
@@ -80,7 +89,7 @@ func createDVWA() (*DVWAfker, error) {
 									Text:    "Open file",
 									MinSize: Size{Width: 120,Height: 50},
 									OnClicked: func(){
-										if err:= brt_sw.pbClicked(); err!=nil {
+										if err:= brt_sw.pbClicked(0); err!=nil {
 											log.Print(err)
 										}									
 									},
@@ -162,6 +171,80 @@ func createDVWA() (*DVWAfker, error) {
 					},
 				},
 			}
+
+		//file upload
+		fileUp_subdef := MainWindow{
+			AssignTo: &file_sw.MainWindow,
+			Title:    "FileUpload",
+			MinSize:  Size{Width: 200, Height: 250},
+			Size:     Size{Width: 400, Height: 500},
+			Layout:	VBox{},
+			Children:	[]Widget{
+					Composite{
+						Layout :Grid{Columns:2,Spacing:10},
+						Children: []Widget{
+							VSplitter{
+								Children:	[]Widget{
+									LineEdit{
+										MinSize:	Size{Width: 120,Height: 10},
+										AssignTo:	&file_sw.editFile,
+										ReadOnly: true,
+									},
+									PushButton{
+										Text:    "Open file",
+										MinSize: Size{Width: 120,Height: 50},
+										OnClicked: func(){
+											if err:= file_sw.pbClicked(1); err!=nil {
+												log.Print(err)
+											}									
+										},
+										AssignTo: &file_sw.fileButton,
+									},
+									PushButton{
+										Text:    "Start Attack",
+										MinSize: Size{Width: 120,Height: 50},
+										OnClicked: func(){
+											if file_sw.filePath == "" {
+												var tmp walk.Form
+												walk.MsgBox(tmp, "Warning", "Load File First!", walk.MsgBoxIconInformation)
+											}else{
+												if file_sw.pushAble == true{
+													go ExcFileup(df.cookieDVWA,df.urlDVWA,file_sw)
+												}else{
+													var tmp walk.Form
+													walk.MsgBox(tmp, "Warning", "Wait For The Current Progress!", walk.MsgBoxIconInformation)
+												}
+												}	
+											return
+										},
+										AssignTo: &file_sw.attackButton,
+									},
+									LineEdit{
+										AssignTo:	&file_sw.editCom,
+									},
+									PushButton{
+										Text:    "Excute Command",
+										MinSize: Size{Width: 120,Height: 50},
+										OnClicked: func(){
+											ExcFileCommand(df.urlDVWA,file_sw)
+										},
+										AssignTo: &file_sw.comExc,
+									},
+									TextEdit{
+										MinSize:	Size{Width: 120,Height: 10},
+										AssignTo:	&file_sw.outPut,
+										ReadOnly: true,
+									},
+									ProgressBar{
+										AssignTo:	&file_sw.progressBar,
+									},
+								},
+							},
+						},
+					},
+				},
+			}
+
 	def := MainWindow{
 		AssignTo: &df.window,
 		Title:    "dvwa crack",
@@ -255,11 +338,23 @@ func createDVWA() (*DVWAfker, error) {
 											}
 											inj_sw.pushAble = true
 											inj_subdef.Create()
-											//_ = brt_sw.MainWindow.Run()
 											return
 										},
 									},
-
+									PushButton{
+										Text:    "File Upload",
+										MinSize: Size{Width: 120,Height: 50},
+										OnClicked: func() {
+											if df.confirmRes != "ok"{
+												var tmp walk.Form
+												walk.MsgBox(tmp, "Error", "Get cookie first!", walk.MsgBoxIconInformation)
+												return
+											}
+											file_sw.pushAble = true
+											fileUp_subdef.Create()
+											return
+										},
+									},
 
 
 								},
