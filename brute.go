@@ -81,7 +81,7 @@ func ExcBrute(cookie string,urlDVWA string,sw *BruteSubWindow) bool {
       	line, err := buf.ReadString('\n')
 		line = strings.TrimSpace(line)
 		kv := strings.Split(line, " ")
-		temp := fmt.Sprintf("test%d:\nusername:%s\npassword:%s\r\n",count,kv[0],kv[1])
+		temp := fmt.Sprintf("test%d:\r\nusername:%s\r\npassword:%s\r\n\r\n",count,kv[0],kv[1])
 		sw.progressBar.SetValue(count-1)
 		sw.outPut.AppendText(temp)
 		count++

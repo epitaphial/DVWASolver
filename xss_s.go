@@ -47,7 +47,7 @@ func ExcXssStore(cookie string,urlDVWA string,sw *BruteSubWindow) bool {
 
    	for count:=0;count<len(payloadJar);count++ {
 		payload := payloadJar[count]
-		temp := fmt.Sprintf("test payload%d : %s \r\n",count+1,payload)
+		temp := fmt.Sprintf("fuzz test payload%d : %s \r\n\r\n",count+1,payload)
 		sw.progressBar.SetValue(count+1)
 		sw.outPut.AppendText(temp)
 		if XSSWithCookie(cookie,fuckurl,payload) == true{

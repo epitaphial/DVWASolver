@@ -290,7 +290,7 @@ func createDVWA() (*DVWAfker, error) {
 	def := MainWindow{
 		AssignTo: &df.window,
 		Title:    "dvwa crack",
-		Icon:     "./res/favicon.ico",
+		//Icon:     "./res/favicon.ico",
 		MinSize:  Size{Width: 320, Height: 300},
 		Size:     Size{Width: 640, Height: 600},
 		Layout:   VBox{},
