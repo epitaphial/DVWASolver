@@ -21,5 +21,6 @@ then run the exe file
 - [x] GUI.
 - [x] Command Injection.
 - [x] File Upload
+- [x] XSS(Stored)
 - [ ] Sql Injection.
 - [ ] etc
