@@ -1,0 +1,4 @@
+//创建文件
+$myfile = fopen("testfile.txt", "w");
+//多行命令
+$a = dirname(__FILE__);$file = scandir($a);print_r($file);

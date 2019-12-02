@@ -290,69 +290,100 @@ func createDVWA() (*DVWAfker, error) {
 	def := MainWindow{
 		AssignTo: &df.window,
 		Title:    "dvwa crack",
+		Icon:     "./res/favicon.ico",
 		MinSize:  Size{Width: 320, Height: 300},
 		Size:     Size{Width: 640, Height: 600},
 		Layout:   VBox{},
+		MenuItems: []MenuItem{
+			Menu{
+				Text: "File",
+				Items: []MenuItem{
+					Action{
+						Text: "Exit",
+						OnTriggered: func() {
+							df.window.Close()
+						},
+					},
+				},
+			},
+			Menu{
+				Text: "Help",
+				Items: []MenuItem{
+					Action{
+						Text: "About",
+						OnTriggered: func() {
+							walk.MsgBox(df.window, "about", "all right reserved by Curled",
+								walk.MsgBoxIconInformation|walk.MsgBoxDefButton1)
+						},
+					},
+				},
+			},
+		},
 		Children: []Widget{
-			Composite{
-				Layout :Grid{Columns:2,Spacing:10},
-				Children: []Widget{
-					VSplitter{
-						Children:	[]Widget{
-							Label{
-								AssignTo:	&df.urlLabel,
-								Text:	"DVWA URL:",
-								Visible: true,
-							},
-							LineEdit{
-								MinSize:	Size{Width: 120,Height: 0},
-								AssignTo:	&df.dvwaEdit,
-							},
-							PushButton{
-								Text:    "fkit!",
-								MinSize: Size{Width: 120,Height: 50},
-								AssignTo:	&df.confirmButton,
-								OnClicked: func() {
-									if df.dvwaEdit.ReadOnly(){
-										var tmp walk.Form
-										walk.MsgBox(tmp, "Warning", "Already init!", walk.MsgBoxIconInformation)
-										return
-									}
-									if df.dvwaEdit.Text() == ""{
-										var tmp walk.Form
-										walk.MsgBox(tmp, "Warning", "Can not be empty!", walk.MsgBoxIconInformation)
-										return
-									}else{
-										urlToParse := df.dvwaEdit.Text()
-										if urlToParse[len(urlToParse)-1:] != "/"{
-											urlToParse = urlToParse + "/"
-										}
-										
-										cookie := InitDvwaUrl(urlToParse)
-										if cookie == ""{
-											var tmp walk.Form
-											walk.MsgBox(tmp, "Error", "Can not get cookie!", walk.MsgBoxIconInformation)
-											return
-										}else{
-											var tmp walk.Form
-											walk.MsgBox(tmp, "Info", "Success init!", walk.MsgBoxIconInformation)
-											df.cookieDVWA = cookie
-											df.urlDVWA = urlToParse
-											df.urlLabel.SetText("PHPSSID:")
-											df.dvwaEdit.SetText(cookie)
-											df.dvwaEdit.SetReadOnly(true)
-											df.confirmRes = "ok"
-											return
-										}
-									}
-								},
-							},
+			GroupBox{
+                Layout: HBox{},
+                Children: []Widget{
+					Label{
+						AssignTo:	&df.urlLabel,
+						Text:	"DVWA URL:",
+						Visible: true,
+					},
+                    LineEdit{
+						MinSize:	Size{Width: 120,Height: 20},
+                        AssignTo: &df.dvwaEdit,
+                    },
+
+					PushButton{
+						Text:    "Get Cookie!",
+						MinSize: Size{Width: 120,Height: 20},
+						AssignTo:	&df.confirmButton,
+						OnClicked: func() {
+							if df.dvwaEdit.ReadOnly(){
+								var tmp walk.Form
+								walk.MsgBox(tmp, "Warning", "Already init!", walk.MsgBoxIconInformation)
+								return
+							}
+							if df.dvwaEdit.Text() == ""{
+								var tmp walk.Form
+								walk.MsgBox(tmp, "Warning", "Can not be empty!", walk.MsgBoxIconInformation)
+								return
+							}else{
+								urlToParse := df.dvwaEdit.Text()
+								if urlToParse[len(urlToParse)-1:] != "/"{
+									urlToParse = urlToParse + "/"
+								}
+								
+								cookie := InitDvwaUrl(urlToParse)
+								if cookie == ""{
+									var tmp walk.Form
+									walk.MsgBox(tmp, "Error", "Can not get cookie!", walk.MsgBoxIconInformation)
+									return
+								}else{
+									var tmp walk.Form
+									walk.MsgBox(tmp, "Info", "Success init!", walk.MsgBoxIconInformation)
+									df.cookieDVWA = cookie
+									df.urlDVWA = urlToParse
+									df.urlLabel.SetText("PHPSSID:")
+									df.dvwaEdit.SetText(cookie)
+									df.dvwaEdit.SetReadOnly(true)
+									df.confirmRes = "ok"
+									return
+								}
+							}
+						},
+					},
+                },
+			},
+			GroupBox{
+                Layout: HBox{},
+                Children: []Widget{
 							VSplitter{
 								Children:	[]Widget{
 									Label{
 										AssignTo:	&df.itemInfo,
 										Text:	"DVWA ITEM:",
 										Visible: true,
+										TextAlignment: AlignCenter,
 									},
 									PushButton{
 										Text:    "Brute Force",
@@ -411,14 +442,10 @@ func createDVWA() (*DVWAfker, error) {
 											return
 										},
 									},
-
 								},
 							},
 						},
-
 					},
-				},
-			},
 		},
 	}
 	err := def.Create()
