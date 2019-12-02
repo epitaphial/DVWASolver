@@ -65,6 +65,7 @@ func createDVWA() (*DVWAfker, error) {
 	brt_sw := &BruteSubWindow{}
 	inj_sw := &BruteSubWindow{}
 	file_sw := &BruteSubWindow{}
+	xss_s_sw := &BruteSubWindow{}
 
 
 	//brute force bind
@@ -245,6 +246,47 @@ func createDVWA() (*DVWAfker, error) {
 				},
 			}
 
+		xss_s_subdef := MainWindow{
+			AssignTo: &xss_s_sw.MainWindow,
+			Title:    "XSS Stored",
+			MinSize:  Size{Width: 200, Height: 250},
+			Size:     Size{Width: 400, Height: 500},
+			Layout:	VBox{},
+			Children:	[]Widget{
+					Composite{
+						Layout :Grid{Columns:2,Spacing:10},
+						Children: []Widget{
+							VSplitter{
+								Children:	[]Widget{
+									PushButton{
+										Text:    "Start Attack",
+										MinSize: Size{Width: 120,Height: 50},
+										OnClicked: func(){
+											if xss_s_sw.pushAble == true{
+												go ExcXssStore(df.cookieDVWA,df.urlDVWA,xss_s_sw)
+											}else{
+												var tmp walk.Form
+												walk.MsgBox(tmp, "Warning", "Wait For The Current Progress!", walk.MsgBoxIconInformation)
+											}
+											return
+										},
+										AssignTo: &xss_s_sw.attackButton,
+									},
+									TextEdit{
+										MinSize:	Size{Width: 120,Height: 10},
+										AssignTo:	&xss_s_sw.outPut,
+										ReadOnly: true,
+									},
+									ProgressBar{
+										AssignTo:	&xss_s_sw.progressBar,
+									},
+								},
+							},
+						},
+					},
+				},
+			}
+
 	def := MainWindow{
 		AssignTo: &df.window,
 		Title:    "dvwa crack",
@@ -355,7 +397,20 @@ func createDVWA() (*DVWAfker, error) {
 											return
 										},
 									},
-
+									PushButton{
+										Text:    "XSS(Stored)",
+										MinSize: Size{Width: 120,Height: 50},
+										OnClicked: func() {
+											if df.confirmRes != "ok"{
+												var tmp walk.Form
+												walk.MsgBox(tmp, "Error", "Get cookie first!", walk.MsgBoxIconInformation)
+												return
+											}
+											xss_s_sw.pushAble = true
+											xss_s_subdef.Create()
+											return
+										},
+									},
 
 								},
 							},
